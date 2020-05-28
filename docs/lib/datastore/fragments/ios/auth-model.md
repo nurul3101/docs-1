@@ -10,7 +10,7 @@ When using the `@auth` directive with DataStore, currently only following fields
 
 ## Updated schema
 
-Create a Model that is read-only.
+The following schema is an example of a model named `Todo` that is readable and writable by the creator, and read only to everyone else.
 
 ```graphql
 type Todo
