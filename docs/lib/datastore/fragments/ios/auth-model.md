@@ -24,7 +24,7 @@ type Todo
 }
 ```
 
-The API will allow users to query, list, and subscribe to model creation, updates, deletions by other users. A user can only update and delete their own model, that is a model can not be updated or deleted by another user.
+The schema will allow users to query, list, and subscribe to model creation, updates, deletions by other users. A user can only update and delete their own model, that is a model can not be updated or deleted by another user.
 
 ## API with Cognito User Pool auth
 
