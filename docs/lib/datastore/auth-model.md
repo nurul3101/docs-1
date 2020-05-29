@@ -3,7 +3,7 @@ title: Models with authorization
 description: Learn more about how DataStore handles Models with finer grain authorization access checks.
 ---
 
-DataStore has the capability to operate on models with finer grain authorization checks. In GraphQL, this is done with the `@auth` directive defined in the [GraphQL Transformer documentation](~/cli/graphql-transformer/directives.md#auth).
+DataStore with [sync to cloud enabled](~/lib/datastore/sync.md) has the capability to operate on models with finer grain authorization checks at the API. In GraphQL, this is done with the `@auth` directive defined in the [GraphQL Transformer documentation](~/cli/graphql-transformer/directives.md#auth).
 
 <amplify-callout>
 

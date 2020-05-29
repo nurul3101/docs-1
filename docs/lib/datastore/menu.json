@@ -7,7 +7,6 @@
     "sync",
     "relational",
     "conflict",
-    "auth-model",
     "schema-updates",
     "how-it-works"
   ]

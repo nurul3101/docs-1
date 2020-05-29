@@ -1,13 +1,3 @@
-<amplify-callout>
-When using the `@auth` directive with DataStore, currently only following fields are supported:
-
-1. `allow` with "owner" and "groups"
-2. `ownerField`
-3. `groups`
-4. `operations`
-
-</amplify-callout>
-
 ## Updated schema
 
 The following schema is an example of a model named `Todo` that is readable and writable by the creator, and read only to everyone else.
@@ -26,9 +16,22 @@ type Todo
 
 The schema will allow users to query, list, and subscribe to model creation, updates, deletions by other users. A user can only update and delete their own model, that is a model can not be updated or deleted by another user.
 
-## API with Cognito User Pool auth
+The `@auth` directive when used with Amplify DataStore supports the following fields:
 
-With the schema, make sure you have selected Cognito User Pool as the auth
+  - `allow` with "owner" and "groups"
+  - `ownerField`
+  - `groups`
+  - `operations`
+
+## Configure API with Amazon Cognito user pool
+
+While using the @auth directive in your schema to limit read/write access, we require authentication to be integrated into your app in order to differentiate who the owner is. To set this up issue the command:
+
+```console
+amplify update api
+```
+
+then follow the prompts:
 
 ```console
 ? Please select from one of the below mentioned services: 
@@ -39,11 +42,12 @@ With the schema, make sure you have selected Cognito User Pool as the auth
   `Amazon Cognito User Pool`
 ```
 
-Once you have updated the schema and selected Cognito User Pool as the authorization type, run `amplify push` 
+Once you are done, run `amplify push` 
 
 ## Configuration
 
-`amplifyconfiguration.json` will have section under "awsAPIPlugins" and "awsCoognitoAuthPlugin" with the API and Auth configurations
+Upon successfully running `amplify push` per the last step, `amplifyconfiguration.json` will have a section under "awsAPIPlugins" and "awsCoognitoAuthPlugin" with the corresponding API and Auth configurations. Your amplifyconfiguration.json may look like this:
+
 ```json
 {
     "api": {
@@ -61,13 +65,12 @@ Add "AWSCognitoAuthPlugin" and "AWSAPIPlugin" to Amplify before configuring
 ```swift
 Amplify.add(plugin: AWSCognitoAuthPlugin())
 Amplify.add(plugin: AWSAPIPlugin())
+Amplify.configure()
 ```
 
 ## Saving
 
 In order to save models, make sure the user is signed in using `Amplify.Auth.signIn`, then you can create an instance of the model as normal and call `DataStore.save`.
-
-If the user's session has expired or the user has logged out but the save is still executed, the model instance will be persisted to local storage. The model instance however will fail to be saved to API and the error handler will be called. See [conflict resolution section](~/lib/datastore/conflict.md) to learn more about how to handle errors in the DataStoreConfiguration's `errorhandler`. To prevent unnecessary saves from occurring, you can check if the user is signed in using `Amplify.Auth.fetchAuthSession`:
 
 ```swift
 Amplify.Auth.fetchAuthSession { (result) in
@@ -83,6 +86,8 @@ Amplify.Auth.fetchAuthSession { (result) in
                     print("Error adding post - \(error.localizedDescription)")
                 }
             }
+        } else {
+          // Show app unauthenticated views and prompt user to sign in again
         }
     case .failure(let authError):
         print("Failed to fetch auth session", authError)
@@ -102,3 +107,9 @@ if let user = Amplify.Auth.getCurrentUser() {
 ```
 
 If you attempt to call `DataStore.save` or `DataStore.delete` on a model that is not owned by the user, then the conflict handler will be called. See [conflict resolution section](~/lib/datastore/conflict.md) to learn more about how to handle conflicts in the DataStoreConfiguration's `conflict handler`
+
+## User unauthenticated
+
+Listen to [Auth events](~/lib/auth/auth-events.md) to reauthenticate the user when session expires or show the authentication flow if the user has signed out.
+
+If the user is no longer authorized (either by signing out or the session has expired), DataStore operations will still executed, the data will be read from and peristed to the local storage. However, save operations will fail and the error handler will be called. See [conflict resolution section](~/lib/datastore/conflict.md) to learn more about how to handle errors in the DataStoreConfiguration's `errorhandler`. 
