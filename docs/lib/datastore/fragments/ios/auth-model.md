@@ -42,6 +42,8 @@ then follow the prompts:
   `Amazon Cognito User Pool`
 ```
 
+Amazon Cognito's user pool is selected here, however, for advanced use cases, you could use your own OpenID Connect provider.
+
 Once you are done, run `amplify push` 
 
 ## Configuration
@@ -52,12 +54,10 @@ Upon successfully running `amplify push` per the last step, `amplifyconfiguratio
 {
     "api": {
         "plugins": {
-            "awsAPIPlugin": { 
-                // ...
+            "awsAPIPlugin"
     "auth": {
         "plugins": {
-            "awsCognitoAuthPlugin": {
-                // ...
+            "awsCognitoAuthPlugin"
 ```
 
 Add "AWSCognitoAuthPlugin" and "AWSAPIPlugin" to Amplify before configuring
@@ -112,4 +112,4 @@ If you attempt to call `DataStore.save` or `DataStore.delete` on a model that is
 
 Listen to [Auth events](~/lib/auth/auth-events.md) to reauthenticate the user when session expires or show the authentication flow if the user has signed out.
 
-If the user is no longer authorized (either by signing out or the session has expired), DataStore operations will still executed, the data will be read from and peristed to the local storage. However, save operations will fail and the error handler will be called. See [conflict resolution section](~/lib/datastore/conflict.md) to learn more about how to handle errors in the DataStoreConfiguration's `errorhandler`. 
+If the user is no longer authorized (either by signing out or the session has expired), DataStore operations will still be executed, the data will be read from and peristed to the local storage. However, operations to sync to the cloud will fail and the error handler will be called. See [conflict resolution section](~/lib/datastore/conflict.md) to learn more about how to handle errors in the DataStoreConfiguration's `errorhandler`. 
