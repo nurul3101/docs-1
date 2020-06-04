@@ -42,22 +42,28 @@ then follow the prompts:
   `Amazon Cognito User Pool`
 ```
 
-Amazon Cognito's user pool is selected here, however, for advanced use cases, you could use your own OpenID Connect provider.
-
-Once you are done, run `amplify push` 
+Once finished, run `amplify push` to provision your services in the backend.
 
 ## Configuration
 
-Upon successfully running `amplify push` per the last step, `amplifyconfiguration.json` will have a section under "awsAPIPlugins" and "awsCoognitoAuthPlugin" with the corresponding API and Auth configurations. Your amplifyconfiguration.json may look like this:
+Upon successfully running `amplify push` per the last step, `amplifyconfiguration.json` will have a section under "awsAPIPlugins" and "awsCoognitoAuthPlugin" with the corresponding API and Auth configurations. Your `amplifyconfiguration.json` may look like this:
 
 ```json
 {
     "api": {
         "plugins": {
-            "awsAPIPlugin"
+            "awsAPIPlugin": {
+                // ...
+            }
+        }
+    },
     "auth": {
         "plugins": {
-            "awsCognitoAuthPlugin"
+            "awsCognitoAuthPlugin": {
+                // ...
+            }
+        }
+    }
 ```
 
 Add "AWSCognitoAuthPlugin" and "AWSAPIPlugin" to Amplify before configuring
@@ -68,32 +74,13 @@ Amplify.add(plugin: AWSAPIPlugin())
 Amplify.configure()
 ```
 
-## Saving
+## Authenticate before Save
 
-In order to save models, make sure the user is signed in using `Amplify.Auth.signIn`, then you can create an instance of the model as normal and call `DataStore.save`.
+In order to save models, make sure the user is signed in using `Amplify.Auth.signIn`, then you can create an instance of the model as normal and call `DataStore.save`. See [Auth.SignIn](~/lib/auth/signin.md) for more details.
 
-```swift
-Amplify.Auth.fetchAuthSession { (result) in
-    switch result {
-    case .success(let authSession):
-        if authSession.isSignedIn {
-            let todo = Todo(content: "my todo content")
-            Amplify.DataStore.save(todo) {
-                switch $0 {
-                case .success:
-                    print("Added post")
-                case .failure(let error):
-                    print("Error adding post - \(error.localizedDescription)")
-                }
-            }
-        } else {
-          // Show app unauthenticated views and prompt user to sign in again
-        }
-    case .failure(let authError):
-        print("Failed to fetch auth session", authError)
-    }
-}
-```
+If the user has terminated the app or toggled between background and foreground of the app, you can check if the user is already signed in using `Amplify.Auth.fetchAuthSession`. See [Auth.fetchAuthSession](~/lib/auth/getting-started.md#check-the-current-auth-session) for more details.
+
+If the user becomes unauthenticated, make sure the app is able to handle this scenario by hiding actions which trigger DataStore operations provided to authenticated users. To handle this scenario, listen to Hub events for Auth. See [Auth Events](~/lib/auth/auth-events.md) for more details. If the user is unauthenticated and the app performs a DataStore operation, it will fail due to an authentication error. See [conflict resolution section](~/lib/datastore/conflict.md) to learn more about how to handle these errors in the DataStoreConfiguration's `errorhandler`. 
 
 ## Model owner
 
@@ -108,8 +95,3 @@ if let user = Amplify.Auth.getCurrentUser() {
 
 If you attempt to call `DataStore.save` or `DataStore.delete` on a model that is not owned by the user, then the conflict handler will be called. See [conflict resolution section](~/lib/datastore/conflict.md) to learn more about how to handle conflicts in the DataStoreConfiguration's `conflict handler`
 
-## User unauthenticated
-
-Listen to [Auth events](~/lib/auth/auth-events.md) to reauthenticate the user when session expires or show the authentication flow if the user has signed out.
-
-If the user is no longer authorized (either by signing out or the session has expired), DataStore operations will still be executed, the data will be read from and peristed to the local storage. However, operations to sync to the cloud will fail and the error handler will be called. See [conflict resolution section](~/lib/datastore/conflict.md) to learn more about how to handle errors in the DataStoreConfiguration's `errorhandler`. 
