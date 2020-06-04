@@ -25,7 +25,7 @@ The `@auth` directive when used with Amplify DataStore supports the following fi
 
 ## Configure API with Amazon Cognito user pool
 
-While using the @auth directive in your schema to limit read/write access, we require authentication to be integrated into your app in order to differentiate who the owner is. To set this up issue the command:
+While using the `@auth` directive in your schema to limit read/write access, we require authentication to be integrated into your app in order to differentiate who the owner is. To set this up issue the command:
 
 ```console
 amplify update api
